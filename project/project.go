@@ -1,6 +1,8 @@
 package project
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -48,22 +50,64 @@ func (proj *Project) BaseName() string {
 	return proj.baseName
 }
 
+func (proj *Project) filterHidden(filePath string) ([]byte, error) {
+	file, fileErr := os.Open(filePath)
+	if fileErr != nil {
+		return nil, fmt.Errorf("failed to open file '%s'", filePath)
+	}
+	defer file.Close()
+
+	lineNumber := 0
+	hiding := false
+	fileContentBuffer := bytes.Buffer{}
+	fileScanner := bufio.NewScanner(file)
+	for fileScanner.Scan() {
+		lineNumber++
+		line := fileScanner.Text()
+		if !hiding {
+			fileContentBuffer.WriteString(line)
+		}
+		if proj.IsHideLine(line) {
+			if hiding {
+				return nil, fmt.Errorf("syntax error, line %d, nested hidden blocks", lineNumber)
+			}
+			hiding = true
+		}
+		if proj.IsStopLine(line) {
+			if !hiding {
+				return nil, fmt.Errorf("syntax error, line %d, dangling stop", lineNumber)
+			}
+			hiding = false
+		}
+	}
+
+	return fileScanner.Bytes(), nil
+}
+
+// Merge copies parts of one project into another.
+// func (proj *Project) Merge(mergePath string) error {
+
+// }
+
 // Path returns the absolute filesystem path to the project root.
 func (proj *Project) Path() string {
 	return proj.path
 }
 
 // Zip compresses a project into a Zip archive.
-func (proj *Project) Zip(zipPath string) error {
+func (proj *Project) Zip(zipPath string, private bool) error {
 	zipFile := new(archivex.ZipFile)
-	zipFile.Create(zipPath)
+	zipErr := zipFile.Create(zipPath)
+	if zipErr != nil {
+		return fmt.Errorf("failed to create archive '%s'", zipPath)
+	}
+	defer zipFile.Close()
 
 	zipInfo, _ := os.Stat(zipPath)
 
 	filepath.Walk(proj.path, func(filePath string, fileInfo os.FileInfo, walkErr error) error {
 		if walkErr != nil {
-			fmt.Fprintf(os.Stderr, "Error reading, skipping '%s'", filePath)
-			return nil
+			return fmt.Errorf("failed to stat '%s', skipping", filePath)
 		}
 
 		// Don't accidentally try to zip the zip file.
@@ -75,21 +119,30 @@ func (proj *Project) Zip(zipPath string) error {
 			return nil
 		}
 
-		fileContent, fileContentErr := ioutil.ReadFile(filePath)
-		if fileContentErr != nil {
-			return fmt.Errorf("failed to read file '%s'", filePath)
+		var fileContent []byte
+
+		if private {
+			content, contentErr := proj.filterHidden(filePath)
+			if contentErr != nil {
+				return contentErr
+			}
+			fileContent = content
+		} else {
+			content, contentErr := ioutil.ReadFile(filePath)
+			if contentErr != nil {
+				return fmt.Errorf("failed to read file '%s'", filePath)
+			}
+			fileContent = content
 		}
 
 		relFilePath, relFilePathErr := filepath.Rel(proj.path, filePath)
 		if relFilePathErr != nil {
-			return fmt.Errorf("Failed to find relative path of '%s'", filePath)
+			return fmt.Errorf("failed to find relative path to file '%s'", filePath)
 		}
 
 		zipFile.Add(path.Join(proj.baseName, relFilePath), fileContent)
 		return nil
 	})
-
-	zipFile.Close()
 
 	return nil
 }

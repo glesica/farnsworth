@@ -37,7 +37,7 @@ func main() {
 					return cli.NewExitError("Failed to load project.", 10)
 				}
 
-				proj.Zip(c.Args().Get(0))
+				proj.Zip(c.Args().Get(0), c.Bool("private"))
 				return nil
 			},
 			Flags: []cli.Flag{

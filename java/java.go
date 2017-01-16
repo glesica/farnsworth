@@ -29,7 +29,7 @@ func Factory() *Proxy {
 type Proxy struct{}
 
 // ShouldMerge indicates whether the given path should be merged.
-func (proxy *Proxy) ShouldMerge(path string) bool {
+func (proxy *Proxy) ShouldMerge(path string, content string) bool {
 	return true
 }
 
