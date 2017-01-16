@@ -32,8 +32,8 @@ func main() {
 					return cli.NewExitError("No archive path provided.", 10)
 				}
 
-				proj, loadErr := project.Load(c.String("project"))
-				if loadErr != nil {
+				proj, projErr := project.Load(c.String("project"))
+				if projErr != nil {
 					return cli.NewExitError("Failed to load project.", 10)
 				}
 
@@ -52,6 +52,41 @@ func main() {
 				},
 			},
 			ArgsUsage: "[archive]",
+		},
+		{
+			Name:    "merge",
+			Aliases: []string{"m"},
+			Usage:   "Merge another project into the specified project.",
+			Action: func(c *cli.Context) error {
+				if c.NArg() != 1 {
+					return cli.NewExitError("No project to merged specified.", 10)
+				}
+
+				proj, projErr := project.Load(c.String("project"))
+				if projErr != nil {
+					return cli.NewExitError("Failed to load project.", 10)
+				}
+
+				mergeProj, mergeProjErr := project.Load(c.Args().Get(0))
+				if mergeProjErr != nil {
+					return cli.NewExitError("Failed to load merge target project.", 10)
+				}
+
+				mergeErr := proj.Merge(*mergeProj)
+				if mergeErr != nil {
+					return mergeErr
+				}
+
+				return nil
+			},
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "project",
+					Usage: "Path to the project `ROOT`",
+					Value: ".",
+				},
+			},
+			ArgsUsage: "[merge source]",
 		},
 	}
 

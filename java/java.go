@@ -1,8 +1,8 @@
 package java
 
-import (
-	"io/ioutil"
-)
+import "io/ioutil"
+import "regexp"
+import "strings"
 
 // IsValid indicates whether the given project root is a valid project of this type.
 func IsValid(path string) bool {
@@ -35,15 +35,25 @@ func (proxy *Proxy) Name() string {
 
 // IsHideLine indicates whether the given line begins a hidden block.
 func (proxy *Proxy) IsHideLine(line string) bool {
-	return false
+	matched, matchedErr := regexp.MatchString(`^\s*//\+\+\s*hide\s*$`, line)
+	if matchedErr != nil {
+		// Dangerous, but meh.
+		return false
+	}
+	return matched
 }
 
 // IsStopLine indicates whether the given line ends a block.
 func (proxy *Proxy) IsStopLine(line string) bool {
-	return false
+	matched, matchedErr := regexp.MatchString(`^\s*//\+\+\s*stop\s*$`, line)
+	if matchedErr != nil {
+		// Dangerous, but meh.
+		return false
+	}
+	return matched
 }
 
 // ShouldMerge indicates whether the given path should be merged.
 func (proxy *Proxy) ShouldMerge(path string, content []byte) bool {
-	return true
+	return strings.Contains(path, "src/test")
 }

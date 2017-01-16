@@ -11,6 +11,8 @@ import (
 
 	"github.com/jhoonb/archivex"
 
+	"strings"
+
 	"github.com/glesica/farnsworth/proxy"
 )
 
@@ -118,8 +120,21 @@ func (proj *Project) Merge(mergeProj Project) error {
 
 		// Merge the file
 
+		destFilePath := strings.Replace(filePath, mergeProj.path, proj.path, 1)
+
+		destFile, destFileErr := os.Create(destFilePath)
+		if destFileErr != nil {
+			return fmt.Errorf("failed to open '%s'", destFilePath)
+		}
+
+		_, destWriteErr := destFile.Write(fileContent)
+		if destWriteErr != nil {
+			return fmt.Errorf("failed to write to '%s'", destFilePath)
+		}
+
 		return nil
 	})
+
 	return nil
 }
 
