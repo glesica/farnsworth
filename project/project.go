@@ -8,12 +8,16 @@ import (
 	"path/filepath"
 
 	"github.com/jhoonb/archivex"
+
+	"github.com/glesica/farnsworth/proxy"
 )
 
 // A Project is a Farnsworth project.
 type Project struct {
-	BaseName string
-	Path     string
+	proxy.Proxy
+
+	baseName string
+	path     string
 }
 
 // Load creates a new project from a path.
@@ -25,22 +29,38 @@ func Load(projectPath string) (*Project, error) {
 
 	projectBaseName := filepath.Base(absProjectPath)
 
+	projectProxy, projectProxyErr := proxy.GetProxy(projectPath)
+	if projectProxyErr != nil {
+		return nil, projectProxyErr
+	}
+
 	project := Project{
-		BaseName: projectBaseName,
-		Path:     absProjectPath,
+		Proxy:    projectProxy,
+		baseName: projectBaseName,
+		path:     absProjectPath,
 	}
 
 	return &project, nil
 }
 
+// BaseName returns the name of the directory that contains the project root.
+func (proj *Project) BaseName() string {
+	return proj.baseName
+}
+
+// Path returns the absolute filesystem path to the project root.
+func (proj *Project) Path() string {
+	return proj.path
+}
+
 // Zip compresses a project into a Zip archive.
-func (proj Project) Zip(zipPath string) error {
+func (proj *Project) Zip(zipPath string) error {
 	zipFile := new(archivex.ZipFile)
 	zipFile.Create(zipPath)
 
 	zipInfo, _ := os.Stat(zipPath)
 
-	filepath.Walk(proj.Path, func(filePath string, fileInfo os.FileInfo, walkErr error) error {
+	filepath.Walk(proj.path, func(filePath string, fileInfo os.FileInfo, walkErr error) error {
 		if walkErr != nil {
 			fmt.Fprintf(os.Stderr, "Error reading, skipping '%s'", filePath)
 			return nil
@@ -60,12 +80,12 @@ func (proj Project) Zip(zipPath string) error {
 			return fmt.Errorf("failed to read file '%s'", filePath)
 		}
 
-		newFilePath, newFilePathErr := filepath.Rel(filepath.Dir(proj.Path), filePath)
-		if newFilePathErr != nil {
+		relFilePath, relFilePathErr := filepath.Rel(proj.path, filePath)
+		if relFilePathErr != nil {
 			return fmt.Errorf("Failed to find relative path of '%s'", filePath)
 		}
 
-		zipFile.Add(path.Join(proj.BaseName, newFilePath), fileContent)
+		zipFile.Add(path.Join(proj.baseName, relFilePath), fileContent)
 		return nil
 	})
 

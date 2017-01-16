@@ -4,6 +4,8 @@ import (
 	"os"
 
 	"github.com/urfave/cli"
+
+	"github.com/glesica/farnsworth/project"
 )
 
 func main() {
@@ -29,7 +31,12 @@ func main() {
 				if c.NArg() != 1 {
 					return cli.NewExitError("No archive path provided.", 10)
 				}
-				proj := LoadProj(c.String("project"))
+
+				proj, loadErr := project.Load(c.String("project"))
+				if loadErr != nil {
+					return cli.NewExitError("Failed to load project.", 10)
+				}
+
 				proj.Zip(c.Args().Get(0))
 				return nil
 			},
