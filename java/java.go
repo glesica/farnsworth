@@ -28,9 +28,9 @@ func Factory() *Proxy {
 // Proxy is a project proxy for a Gradle-based Java project.
 type Proxy struct{}
 
-// ShouldMerge indicates whether the given path should be merged.
-func (proxy *Proxy) ShouldMerge(path string, content string) bool {
-	return true
+// Name is the unique name of the project proxy.
+func (proxy *Proxy) Name() string {
+	return "java"
 }
 
 // IsHideLine indicates whether the given line begins a hidden block.
@@ -41,4 +41,9 @@ func (proxy *Proxy) IsHideLine(line string) bool {
 // IsStopLine indicates whether the given line ends a block.
 func (proxy *Proxy) IsStopLine(line string) bool {
 	return false
+}
+
+// ShouldMerge indicates whether the given path should be merged.
+func (proxy *Proxy) ShouldMerge(path string, content []byte) bool {
+	return true
 }

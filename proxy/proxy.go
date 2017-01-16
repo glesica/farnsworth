@@ -8,9 +8,10 @@ import (
 
 // Proxy is a project type interface. For instance, a Java project.
 type Proxy interface {
-	ShouldMerge(path string, content string) bool
+	Name() string
 	IsHideLine(line string) bool
 	IsStopLine(line string) bool
+	ShouldMerge(path string, content []byte) bool
 }
 
 // Validator indicates whether the project rooted at the given path

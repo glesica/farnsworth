@@ -85,9 +85,43 @@ func (proj *Project) filterHidden(filePath string) ([]byte, error) {
 }
 
 // Merge copies parts of one project into another.
-// func (proj *Project) Merge(mergePath string) error {
+// TODO: This should take another project.
+// TODO: Make sure the merge path project is validated?
+func (proj *Project) Merge(mergeProj Project) error {
+	if proj.Name() != mergeProj.Name() {
+		return fmt.Errorf(
+			"cannot merge project of type '%s' into project of type '%s'",
+			mergeProj.Name(),
+			proj.Name())
+	}
 
-// }
+	filepath.Walk(mergeProj.path, func(
+		filePath string,
+		fileInfo os.FileInfo,
+		walkErr error) error {
+		if walkErr != nil {
+			return fmt.Errorf("failed to stat '%s', skipping", filePath)
+		}
+
+		if fileInfo.IsDir() {
+			return nil
+		}
+
+		fileContent, fileContentErr := ioutil.ReadFile(filePath)
+		if fileContentErr != nil {
+			return fmt.Errorf("failed to read '%s'", filePath)
+		}
+
+		if !proj.ShouldMerge(filePath, fileContent) {
+			return nil
+		}
+
+		// Merge the file
+
+		return nil
+	})
+	return nil
+}
 
 // Path returns the absolute filesystem path to the project root.
 func (proj *Project) Path() string {
