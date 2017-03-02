@@ -21,6 +21,7 @@ func getPassingTags(label string) []string {
 		fmt.Sprintf("//++\t%s", label),
 		fmt.Sprintf("//++ %s\t\t", label),
 		fmt.Sprintf("//++%s", label),
+		fmt.Sprintf("//++ %s\n", label),
 	}
 }
 

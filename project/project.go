@@ -66,14 +66,15 @@ func (proj *Project) filterHidden(filePath string) ([]byte, error) {
 	for fileScanner.Scan() {
 		lineNumber++
 		line := fileScanner.Text()
-		if !hiding {
-			fileContentBuffer.WriteString(line)
-		}
 		if proj.IsHideLine(line) {
 			if hiding {
 				return nil, fmt.Errorf("syntax error, line %d, nested hidden blocks", lineNumber)
 			}
 			hiding = true
+		}
+		if !hiding {
+			fileContentBuffer.WriteString(line)
+			fileContentBuffer.WriteString("\n")
 		}
 		if proj.IsStopLine(line) {
 			if !hiding {
@@ -83,7 +84,7 @@ func (proj *Project) filterHidden(filePath string) ([]byte, error) {
 		}
 	}
 
-	return fileScanner.Bytes(), nil
+	return fileContentBuffer.Bytes(), nil
 }
 
 // Merge copies parts of one project into another.
