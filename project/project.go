@@ -88,7 +88,6 @@ func (proj *Project) filterHidden(filePath string) ([]byte, error) {
 }
 
 // Merge copies parts of one project into another.
-// TODO: This should take another project.
 // TODO: Make sure the merge path project is validated?
 func (proj *Project) Merge(mergeProj Project) error {
 	if proj.Name() != mergeProj.Name() {
