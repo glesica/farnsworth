@@ -50,8 +50,7 @@ func (proj *Project) BaseName() string {
 	return proj.baseName
 }
 
-// Merge copies parts of one project into another.
-// TODO: Make sure the merge path project is validated?
+// Merge copies parts of another project into the receiver project.
 func (proj *Project) Merge(mergeProj Project) error {
 	if proj.Name() != mergeProj.Name() {
 		return fmt.Errorf(
