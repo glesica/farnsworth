@@ -1,8 +1,6 @@
 package project
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -50,41 +48,6 @@ func Load(projectPath string) (*Project, error) {
 // BaseName returns the name of the directory that contains the project root.
 func (proj *Project) BaseName() string {
 	return proj.baseName
-}
-
-func (proj *Project) filterHidden(filePath string) ([]byte, error) {
-	file, fileErr := os.Open(filePath)
-	if fileErr != nil {
-		return nil, fmt.Errorf("failed to open file '%s'", filePath)
-	}
-	defer file.Close()
-
-	lineNumber := 0
-	hiding := false
-	fileContentBuffer := bytes.Buffer{}
-	fileScanner := bufio.NewScanner(file)
-	for fileScanner.Scan() {
-		lineNumber++
-		line := fileScanner.Text()
-		if proj.IsHideLine(line) {
-			if hiding {
-				return nil, fmt.Errorf("syntax error, line %d, nested hidden blocks", lineNumber)
-			}
-			hiding = true
-		}
-		if !hiding {
-			fileContentBuffer.WriteString(line)
-			fileContentBuffer.WriteString("\n")
-		}
-		if proj.IsStopLine(line) {
-			if !hiding {
-				return nil, fmt.Errorf("syntax error, line %d, dangling stop", lineNumber)
-			}
-			hiding = false
-		}
-	}
-
-	return fileContentBuffer.Bytes(), nil
 }
 
 // Merge copies parts of one project into another.
@@ -171,11 +134,11 @@ func (proj *Project) Zip(zipPath string, private bool) error {
 		var fileContent []byte
 
 		if private {
-			content, contentErr := proj.filterHidden(filePath)
+			content, contentErr := proxy.RemoveHiddenLinesFromFile(filePath, proj)
 			if contentErr != nil {
 				return contentErr
 			}
-			fileContent = content
+			fileContent = []byte(content)
 		} else {
 			content, contentErr := ioutil.ReadFile(filePath)
 			if contentErr != nil {

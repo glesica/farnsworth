@@ -13,26 +13,38 @@ func TestName(t *testing.T) {
 
 func getPassingTags(label string) []string {
 	return []string{
-		fmt.Sprintf("//++ %s", label),
-		fmt.Sprintf("  //++ %s", label),
-		fmt.Sprintf("\t\t//++ %s", label),
-		fmt.Sprintf("//++ %s  ", label),
-		fmt.Sprintf("//++\t%s  ", label),
-		fmt.Sprintf("//++\t%s", label),
-		fmt.Sprintf("//++ %s\t\t", label),
 		fmt.Sprintf("//++%s", label),
+		fmt.Sprintf("//++ %s", label),
+		fmt.Sprintf(" //++ %s", label),
+		fmt.Sprintf("  //++ %s", label),
+		fmt.Sprintf("\t//++ %s", label),
+		fmt.Sprintf("\t\t//++ %s", label),
+		fmt.Sprintf("//++ %s", label),
+		fmt.Sprintf("//++ %s ", label),
+		fmt.Sprintf("//++ %s  ", label),
+		fmt.Sprintf("//++ %s\t", label),
+		fmt.Sprintf("//++ %s\t\t", label),
+		fmt.Sprintf("//++\t%s", label),
+		fmt.Sprintf("//++\t%s ", label),
+		fmt.Sprintf("//++\t%s  ", label),
+		fmt.Sprintf("//++\t%s\t", label),
+		fmt.Sprintf("//++\t%s\t\t", label),
 		fmt.Sprintf("//++ %s\n", label),
 	}
 }
 
 func getFailingTags(label string) []string {
 	return []string{
-		fmt.Sprintf("// ++%s", label),
-		fmt.Sprintf("///++ %s", label),
-		fmt.Sprintf("//+++ %s", label),
+		fmt.Sprintf("// +%s", label),
 		fmt.Sprintf("//+ %s", label),
 		fmt.Sprintf("// + %s", label),
-		fmt.Sprintf("// +%s", label),
+		fmt.Sprintf("// ++%s", label),
+		fmt.Sprintf("///++ %s", label),
+		fmt.Sprintf("/// ++ %s", label),
+		fmt.Sprintf("// +++%s", label),
+		fmt.Sprintf("//+++ %s", label),
+		fmt.Sprintf("// +++ %s", label),
+		fmt.Sprintf("// %s", label),
 	}
 }
 
