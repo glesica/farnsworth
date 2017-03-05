@@ -37,12 +37,12 @@ func main() {
 					return cli.NewExitError("Failed to load project.", 10)
 				}
 
-				proj.Zip(c.Args().Get(0), c.Bool("private"))
+				proj.Zip(c.Args().Get(0), c.Bool("public"))
 				return nil
 			},
 			Flags: []cli.Flag{
 				cli.BoolFlag{
-					Name:  "private",
+					Name:  "public",
 					Usage: "Remove hidden content before archive is created",
 				},
 				cli.StringFlag{
