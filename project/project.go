@@ -30,13 +30,13 @@ func Load(projectPath string) (*Project, error) {
 
 	projectBaseName := filepath.Base(absProjectPath)
 
-	projectProxy, projectProxyErr := proxy.GetProxy(projectPath)
-	if projectProxyErr != nil {
-		return nil, projectProxyErr
+	proxy, err := proxy.GetProxy(projectPath)
+	if err != nil {
+		return nil, err
 	}
 
 	project := Project{
-		Proxy:    projectProxy,
+		Proxy:    proxy,
 		baseName: projectBaseName,
 		path:     absProjectPath,
 	}
@@ -61,8 +61,8 @@ func (proj *Project) MergeFrom(mergeProj Project) error {
 	filepath.Walk(mergeProj.path, func(
 		filePath string,
 		fileInfo os.FileInfo,
-		walkErr error) error {
-		if walkErr != nil {
+		err error) error {
+		if err != nil {
 			return fmt.Errorf("failed to stat '%s', skipping", filePath)
 		}
 
@@ -70,8 +70,8 @@ func (proj *Project) MergeFrom(mergeProj Project) error {
 			return nil
 		}
 
-		fileContent, fileContentErr := ioutil.ReadFile(filePath)
-		if fileContentErr != nil {
+		fileContent, err := ioutil.ReadFile(filePath)
+		if err != nil {
 			return fmt.Errorf("failed to read '%s'", filePath)
 		}
 
@@ -83,13 +83,13 @@ func (proj *Project) MergeFrom(mergeProj Project) error {
 
 		destFilePath := strings.Replace(filePath, mergeProj.path, proj.path, 1)
 
-		destFile, destFileErr := os.Create(destFilePath)
-		if destFileErr != nil {
+		destFile, err := os.Create(destFilePath)
+		if err != nil {
 			return fmt.Errorf("failed to open '%s'", destFilePath)
 		}
 
-		_, destWriteErr := destFile.Write(fileContent)
-		if destWriteErr != nil {
+		_, err = destFile.Write(fileContent)
+		if err != nil {
 			return fmt.Errorf("failed to write to '%s'", destFilePath)
 		}
 
