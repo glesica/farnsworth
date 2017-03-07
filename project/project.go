@@ -134,30 +134,30 @@ func (proj *Project) Zip(zipPath string, private bool) error {
 		var fileContent []byte
 
 		if private {
-			content, contentErr := proxy.RemoveHiddenLinesFromFile(filePath, proj)
-			if contentErr != nil {
-				return contentErr
+			content, err := proxy.RemoveHiddenLinesFromFile(filePath, proj)
+			if err != nil {
+				return err
 			}
 			fileContent = []byte(content)
 		} else {
-			content, contentErr := ioutil.ReadFile(filePath)
-			if contentErr != nil {
+			content, err := ioutil.ReadFile(filePath)
+			if err != nil {
 				return fmt.Errorf("failed to read file '%s'", filePath)
 			}
 			fileContent = content
 		}
 
-		relFilePath, relFilePathErr := filepath.Rel(proj.path, filePath)
-		if relFilePathErr != nil {
+		relFilePath, err := filepath.Rel(proj.path, filePath)
+		if err != nil {
 			return fmt.Errorf("failed to find relative path to file '%s'", filePath)
 		}
 
-		f, err := zipWriter.Create(path.Join(proj.baseName, relFilePath))
+		writer, err := zipWriter.Create(path.Join(proj.baseName, relFilePath))
 		if err != nil {
 			return fmt.Errorf("failed add file to zip %s", filePath)
 		}
 
-		_, err = f.Write(fileContent)
+		_, err = writer.Write(fileContent)
 		if err != nil {
 			return fmt.Errorf("failed to write '%s' contents to zip", filePath)
 		}
