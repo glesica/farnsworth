@@ -40,3 +40,6 @@ farnsworth
 .vscode
 .idea
 
+# Error outputs
+*.t.err
+
