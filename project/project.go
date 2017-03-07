@@ -1,13 +1,12 @@
 package project
 
 import (
+	"archive/zip"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
-
-	"github.com/jhoonb/archivex"
 
 	"strings"
 
@@ -107,11 +106,13 @@ func (proj *Project) Path() string {
 
 // Zip compresses a project into a Zip archive.
 func (proj *Project) Zip(zipPath string, private bool) error {
-	zipFile := new(archivex.ZipFile)
-	zipErr := zipFile.Create(zipPath)
-	if zipErr != nil {
+	zipFile, err := os.Create(zipPath)
+	if err != nil {
 		return fmt.Errorf("failed to create archive '%s'", zipPath)
 	}
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
 	defer zipFile.Close()
 
 	zipInfo, _ := os.Stat(zipPath)
@@ -151,7 +152,16 @@ func (proj *Project) Zip(zipPath string, private bool) error {
 			return fmt.Errorf("failed to find relative path to file '%s'", filePath)
 		}
 
-		zipFile.Add(path.Join(proj.baseName, relFilePath), fileContent)
+		f, err := zipWriter.Create(path.Join(proj.baseName, relFilePath))
+		if err != nil {
+			return fmt.Errorf("failed add file to zip %s", filePath)
+		}
+
+		_, err = f.Write(fileContent)
+		if err != nil {
+			return fmt.Errorf("failed to write '%s' contents to zip", filePath)
+		}
+
 		return nil
 	})
 
