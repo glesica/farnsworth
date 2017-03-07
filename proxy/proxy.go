@@ -9,6 +9,7 @@ import (
 	"bufio"
 
 	"github.com/glesica/farnsworth/proxy/java"
+	"github.com/glesica/farnsworth/proxy/go"
 )
 
 // Proxy is a project type interface. For instance, a Java project.
@@ -83,6 +84,9 @@ type Factory func() Proxy
 func GetProxy(path string) (Proxy, error) {
 	if java.IsValid(path) {
 		return java.Factory(), nil
+	}
+	if golang.IsValid(path) {
+		return golang.Factory(), nil
 	}
 	return nil, fmt.Errorf("path '%s' is not a valid project root", path)
 }
