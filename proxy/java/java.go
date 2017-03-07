@@ -1,8 +1,16 @@
 package java
 
-import "io/ioutil"
-import "regexp"
-import "strings"
+import (
+	"io/ioutil"
+	"regexp"
+	"strings"
+
+	"github.com/glesica/farnsworth/proxy"
+)
+
+func init() {
+	proxy.Register(Factory, IsValid)
+}
 
 // IsValid indicates whether the given project root is a valid project of this type.
 func IsValid(path string) bool {
@@ -21,20 +29,20 @@ func IsValid(path string) bool {
 }
 
 // Factory returns an instance of the Proxy.
-func Factory() *Proxy {
-	return &Proxy{}
+func Factory() proxy.Proxy {
+	return &java{}
 }
 
-// Proxy is a project proxy for a Gradle-based Java project.
-type Proxy struct{}
+// java is a project proxy for a Gradle-based Java project.
+type java struct{}
 
 // Name is the unique name of the project proxy.
-func (proxy *Proxy) Name() string {
+func (proxy *java) Name() string {
 	return "java"
 }
 
 // IsHideLine indicates whether the given line begins a hidden block.
-func (proxy *Proxy) IsHideLine(line string) bool {
+func (proxy *java) IsHideLine(line string) bool {
 	matched, matchedErr := regexp.MatchString(`^\s*//\+\+\s*hide\s*$`, line)
 	if matchedErr != nil {
 		// Dangerous, but meh.
@@ -44,7 +52,7 @@ func (proxy *Proxy) IsHideLine(line string) bool {
 }
 
 // IsStopLine indicates whether the given line ends a block.
-func (proxy *Proxy) IsStopLine(line string) bool {
+func (proxy *java) IsStopLine(line string) bool {
 	matched, matchedErr := regexp.MatchString(`^\s*//\+\+\s*stop\s*$`, line)
 	if matchedErr != nil {
 		// Dangerous, but meh.
@@ -54,6 +62,6 @@ func (proxy *Proxy) IsStopLine(line string) bool {
 }
 
 // ShouldMerge indicates whether the given path should be merged.
-func (proxy *Proxy) ShouldMerge(path string, content []byte) bool {
+func (proxy *java) ShouldMerge(path string, content []byte) bool {
 	return strings.Contains(path, "src/test")
 }

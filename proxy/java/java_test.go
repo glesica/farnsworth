@@ -4,7 +4,7 @@ import "testing"
 import "fmt"
 
 func TestName(t *testing.T) {
-	proxy := Proxy{}
+	proxy := java{}
 	name := proxy.Name()
 	if name != "java" {
 		t.Errorf("Expected Name() to return 'java', found '%s'", name)
@@ -49,7 +49,7 @@ func getFailingTags(label string) []string {
 }
 
 func TestIsHideLine(t *testing.T) {
-	proxy := Proxy{}
+	proxy := java{}
 	// True
 	for _, line := range getPassingTags("hide") {
 		t.Run(fmt.Sprintf("line='%s'", line), func(t *testing.T) {
@@ -69,7 +69,7 @@ func TestIsHideLine(t *testing.T) {
 }
 
 func TestIsStopLine(t *testing.T) {
-	proxy := Proxy{}
+	proxy := java{}
 	// True
 	for _, line := range getPassingTags("stop") {
 		t.Run(fmt.Sprintf("line='%s'", line), func(t *testing.T) {
@@ -89,7 +89,7 @@ func TestIsStopLine(t *testing.T) {
 }
 
 func TestShouldMerge(t *testing.T) {
-	proxy := Proxy{}
+	proxy := java{}
 	// True
 	for _, path := range []string{
 		"src/test/test.java",
