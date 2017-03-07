@@ -4,14 +4,12 @@ clean:
 	rm -f farnsworth
 	go clean
 
-functional-test: farnsworth
+functional-test:
+	go build
 	cram tests/*.t
 
 unit-test:
 	go test ./...
 
 test: unit-test functional-test
-
-farnsworth:
-	go build
 

@@ -8,7 +8,7 @@ import (
 
 	"bufio"
 
-	"github.com/glesica/farnsworth/java"
+	"github.com/glesica/farnsworth/proxy/java"
 )
 
 // Proxy is a project type interface. For instance, a Java project.
