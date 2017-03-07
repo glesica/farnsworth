@@ -50,8 +50,8 @@ func (proj *Project) BaseName() string {
 	return proj.baseName
 }
 
-// Merge copies parts of another project into the receiver project.
-func (proj *Project) Merge(mergeProj Project) error {
+// MergeFrom copies parts of another project into the receiver project.
+func (proj *Project) MergeFrom(mergeProj Project) error {
 	if proj.Name() != mergeProj.Name() {
 		return fmt.Errorf(
 			"cannot merge project of type '%s' into project of type '%s'",

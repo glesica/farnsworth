@@ -72,7 +72,7 @@ func main() {
 					return cli.NewExitError("Failed to load merge target project.", 10)
 				}
 
-				mergeErr := proj.Merge(*mergeProj)
+				mergeErr := proj.MergeFrom(*mergeProj)
 				if mergeErr != nil {
 					return mergeErr
 				}
@@ -82,7 +82,7 @@ func main() {
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "project",
-					Usage: "Path to the project `ROOT`",
+					Usage: "Path to the base project `ROOT`",
 					Value: ".",
 				},
 			},
