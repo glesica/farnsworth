@@ -110,10 +110,10 @@ func (proj *Project) Zip(zipPath string, private bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to create archive '%s'", zipPath)
 	}
+	defer zipFile.Close()
 
 	zipWriter := zip.NewWriter(zipFile)
 	defer zipWriter.Close()
-	defer zipFile.Close()
 
 	zipInfo, _ := os.Stat(zipPath)
 
