@@ -1,6 +1,6 @@
 .PHONY: clean functional-test get-deps unit-test test
 
-test: get-deps unit-test functional-test
+test: unit-test functional-test
 
 clean:
 	rm -f farnsworth
@@ -12,7 +12,7 @@ functional-test:
 
 get-deps:
 	go get ./...
-	pip install -r tests/requirements.txt
+	pip install --user -r tests/requirements.txt
 
 unit-test:
 	go test ./...
