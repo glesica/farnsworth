@@ -1,6 +1,7 @@
 package java
 
 import (
+	"io"
 	"io/ioutil"
 	"regexp"
 	"strings"
@@ -62,6 +63,6 @@ func (proxy *java) IsStopLine(line string) bool {
 }
 
 // ShouldMerge indicates whether the given path should be merged.
-func (proxy *java) ShouldMerge(path string, content []byte) bool {
+func (proxy *java) ShouldMerge(path string, content io.Reader) bool {
 	return strings.Contains(path, "src/test")
 }

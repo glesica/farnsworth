@@ -25,7 +25,7 @@ type Proxy interface {
 	IsHideLine(line string) bool
 	IsStopLine(line string) bool
 	Name() string
-	ShouldMerge(path string, content []byte) bool
+	ShouldMerge(path string, content io.Reader) bool
 }
 
 // RemoveHiddenLines returns the contents of a Reader with all hidden

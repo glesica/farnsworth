@@ -3,6 +3,7 @@ package project
 import (
 	"archive/zip"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -21,8 +22,11 @@ type Project struct {
 	path     string
 }
 
-// Load creates a new project from a path.
-func Load(projectPath string) (*Project, error) {
+// A ProxyFactory creates and returns the appropriate kind of
+// Proxy for a given path.
+type ProxyFactory func(projectPath string) (proxy.Proxy, error)
+
+func loadWithFactory(projectPath string, proxyFactory ProxyFactory) (*Project, error) {
 	absProjectPath, err := filepath.Abs(projectPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert '%s' to absolute path", projectPath)
@@ -30,7 +34,7 @@ func Load(projectPath string) (*Project, error) {
 
 	projectBaseName := filepath.Base(absProjectPath)
 
-	proxy, err := proxy.Get(projectPath)
+	proxy, err := proxyFactory(projectPath)
 	if err != nil {
 		return nil, err
 	}
@@ -42,6 +46,11 @@ func Load(projectPath string) (*Project, error) {
 	}
 
 	return &project, nil
+}
+
+// Load creates a new project from a path.
+func Load(projectPath string) (*Project, error) {
+	return loadWithFactory(projectPath, proxy.Get)
 }
 
 // BaseName returns the name of the directory that contains the project root.
@@ -70,16 +79,24 @@ func (proj *Project) MergeFrom(mergeProj Project) error {
 			return nil
 		}
 
-		fileContent, err := ioutil.ReadFile(filePath)
+		fileReader, err := os.Open(filePath)
 		if err != nil {
 			return fmt.Errorf("failed to read '%s'", filePath)
 		}
 
-		if !proj.ShouldMerge(filePath, fileContent) {
+		if !proj.ShouldMerge(filePath, fileReader) {
 			return nil
 		}
 
+		fileReader.Close()
+
 		// Merge the file
+
+		srcFile, err := os.Open(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to read '%s'", filePath)
+		}
+		defer srcFile.Close()
 
 		destFilePath := strings.Replace(filePath, mergeProj.path, proj.path, 1)
 
@@ -87,8 +104,9 @@ func (proj *Project) MergeFrom(mergeProj Project) error {
 		if err != nil {
 			return fmt.Errorf("failed to open '%s'", destFilePath)
 		}
+		defer destFile.Close()
 
-		_, err = destFile.Write(fileContent)
+		_, err = io.Copy(destFile, srcFile)
 		if err != nil {
 			return fmt.Errorf("failed to write to '%s'", destFilePath)
 		}

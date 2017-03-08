@@ -1,8 +1,11 @@
 package proxy
 
-import "testing"
-import "strings"
-import "bytes"
+import (
+	"bytes"
+	"io"
+	"strings"
+	"testing"
+)
 
 type testProxy struct{}
 
@@ -18,7 +21,7 @@ func (proxy *testProxy) Name() string {
 	return "test proxy"
 }
 
-func (proxy *testProxy) ShouldMerge(path string, content []byte) bool {
+func (proxy *testProxy) ShouldMerge(path string, content io.Reader) bool {
 	return false
 }
 
