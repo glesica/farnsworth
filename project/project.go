@@ -23,14 +23,14 @@ type Project struct {
 
 // Load creates a new project from a path.
 func Load(projectPath string) (*Project, error) {
-	absProjectPath, absProjectPathErr := filepath.Abs(projectPath)
-	if absProjectPathErr != nil {
+	absProjectPath, err := filepath.Abs(projectPath)
+	if err != nil {
 		return nil, fmt.Errorf("failed to convert '%s' to absolute path", projectPath)
 	}
 
 	projectBaseName := filepath.Base(absProjectPath)
 
-	proxy, err := proxy.GetProxy(projectPath)
+	proxy, err := proxy.Get(projectPath)
 	if err != nil {
 		return nil, err
 	}
@@ -117,8 +117,8 @@ func (proj *Project) Zip(zipPath string, private bool) error {
 
 	zipInfo, _ := os.Stat(zipPath)
 
-	filepath.Walk(proj.path, func(filePath string, fileInfo os.FileInfo, walkErr error) error {
-		if walkErr != nil {
+	filepath.Walk(proj.path, func(filePath string, fileInfo os.FileInfo, err error) error {
+		if err != nil {
 			return fmt.Errorf("failed to stat '%s', skipping", filePath)
 		}
 

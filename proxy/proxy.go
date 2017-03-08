@@ -5,12 +5,20 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 
 	"bufio"
-
-	"github.com/glesica/farnsworth/proxy/java"
-	"github.com/glesica/farnsworth/proxy/go"
 )
+
+var (
+	proxyRegistryLock sync.Mutex
+	proxyRegistry     = []*proxyRegistryEntry{}
+)
+
+type proxyRegistryEntry struct {
+	factory   Factory
+	validator Validator
+}
 
 // Proxy is a project type interface. For instance, a Java project.
 type Proxy interface {
@@ -79,14 +87,24 @@ type Validator func(path string) bool
 // Factory returns a new Proxy instance.
 type Factory func() Proxy
 
-// GetProxy returns an instance of the correct proxy for the project
+// Get returns an instance of the correct proxy for the project
 //rooted at the given path.
-func GetProxy(path string) (Proxy, error) {
-	if java.IsValid(path) {
-		return java.Factory(), nil
+func Get(path string) (Proxy, error) {
+	for _, entry := range proxyRegistry {
+		if entry.validator(path) {
+			return entry.factory(), nil
+		}
 	}
-	if golang.IsValid(path) {
-		return golang.Factory(), nil
-	}
+
 	return nil, fmt.Errorf("path '%s' is not a valid project root", path)
+}
+
+// Register adds a given factory to be considered when making a call
+// to GetProxy. The factory will be invoked if the associated validator returns
+// true.
+func Register(factory Factory, validator Validator) {
+	proxyRegistryLock.Lock()
+	defer proxyRegistryLock.Unlock()
+
+	proxyRegistry = append(proxyRegistry, &proxyRegistryEntry{factory, validator})
 }

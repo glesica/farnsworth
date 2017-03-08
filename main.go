@@ -6,6 +6,8 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/glesica/farnsworth/project"
+	_ "github.com/glesica/farnsworth/proxy/go"
+	_ "github.com/glesica/farnsworth/proxy/java"
 )
 
 func main() {
