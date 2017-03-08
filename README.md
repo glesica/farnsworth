@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/glesica/farnsworth.svg?branch=master)](https://travis-ci.org/glesica/farnsworth)
+
 # Farnsworth
 
 Farnsworth is a tool to help in the creation and evaluation of programming
