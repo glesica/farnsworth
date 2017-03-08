@@ -1,4 +1,6 @@
-.PHONY: clean functional-test unit-test test
+.PHONY: clean functional-test get-deps unit-test test
+
+test: get-deps unit-test functional-test
 
 clean:
 	rm -f farnsworth
@@ -8,8 +10,10 @@ functional-test:
 	go build
 	cram tests/*.t
 
+get-deps:
+	go get ./...
+	pip install -r tests/requirements.txt
+
 unit-test:
 	go test ./...
-
-test: unit-test functional-test
 
