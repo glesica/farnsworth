@@ -83,12 +83,11 @@ func (proj *Project) MergeFrom(mergeProj Project) error {
 		if err != nil {
 			return fmt.Errorf("failed to read '%s'", filePath)
 		}
+		defer fileReader.Close()
 
 		if !proj.ShouldMerge(filePath, fileReader) {
 			return nil
 		}
-
-		fileReader.Close()
 
 		// Merge the file
 
