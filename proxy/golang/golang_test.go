@@ -96,7 +96,7 @@ func TestShouldMerge(t *testing.T) {
 		"module/submodule_test.go",
 	} {
 		t.Run(fmt.Sprintf("path='%s'", path), func(t *testing.T) {
-			if !proxy.ShouldMerge(path, []byte{}) {
+			if !proxy.ShouldMerge(path, nil) {
 				t.Errorf("Expected ShouldMerge to return `true` for '%s'", path)
 			}
 		})
@@ -109,7 +109,7 @@ func TestShouldMerge(t *testing.T) {
 		"readme.md",
 	} {
 		t.Run(fmt.Sprintf("path='%s'", path), func(t *testing.T) {
-			if proxy.ShouldMerge(path, []byte{}) {
+			if proxy.ShouldMerge(path, nil) {
 				t.Errorf("Expected ShouldMerge to return `false` for '%s'", path)
 			}
 		})

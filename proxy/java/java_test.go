@@ -1,7 +1,9 @@
 package java
 
-import "testing"
-import "fmt"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestName(t *testing.T) {
 	proxy := java{}
@@ -96,7 +98,7 @@ func TestShouldMerge(t *testing.T) {
 		"src/test/package/test.java",
 	} {
 		t.Run(fmt.Sprintf("path='%s'", path), func(t *testing.T) {
-			if !proxy.ShouldMerge(path, []byte{}) {
+			if !proxy.ShouldMerge(path, nil) {
 				t.Errorf("Expected ShouldMerge to return `true` for '%s'", path)
 			}
 		})
@@ -108,7 +110,7 @@ func TestShouldMerge(t *testing.T) {
 		"readme.md",
 	} {
 		t.Run(fmt.Sprintf("path='%s'", path), func(t *testing.T) {
-			if proxy.ShouldMerge(path, []byte{}) {
+			if proxy.ShouldMerge(path, nil) {
 				t.Errorf("Expected ShouldMerge to return `false` for '%s'", path)
 			}
 		})

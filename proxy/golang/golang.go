@@ -1,6 +1,7 @@
 package golang
 
 import (
+	"io"
 	"io/ioutil"
 	"regexp"
 	"strings"
@@ -63,6 +64,6 @@ func (proxy *golang) IsStopLine(line string) bool {
 }
 
 // ShouldMerge indicates whether the given path should be merged.
-func (proxy *golang) ShouldMerge(path string, content []byte) bool {
+func (proxy *golang) ShouldMerge(path string, content io.Reader) bool {
 	return strings.HasSuffix(path, "_test.go")
 }
