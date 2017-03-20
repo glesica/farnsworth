@@ -124,6 +124,7 @@ func (proj *Project) Path() string {
 
 // Zip compresses a project into a Zip archive.
 func (proj *Project) Zip(zipPath string, private bool) error {
+	// TODO: This stuff can be abstracted by Archiver.
 	zipFile, err := os.Create(zipPath)
 	if err != nil {
 		return fmt.Errorf("failed to create archive '%s'", zipPath)
@@ -141,6 +142,9 @@ func (proj *Project) Zip(zipPath string, private bool) error {
 		}
 
 		// Don't accidentally try to zip the zip file.
+		// TODO: Figure out how to do this check with the Archiver.
+		//       Maybe it isn't needed any more if all file operations are
+		//       held until after the tree has been walked?
 		if os.SameFile(zipInfo, fileInfo) {
 			return nil
 		}
@@ -151,6 +155,7 @@ func (proj *Project) Zip(zipPath string, private bool) error {
 
 		var fileContent []byte
 
+		// TODO: We can extract this block into a method that operates on a Reader.
 		if private {
 			content, err := proxy.RemoveHiddenLinesFromFile(filePath, proj)
 			if err != nil {
@@ -170,6 +175,7 @@ func (proj *Project) Zip(zipPath string, private bool) error {
 			return fmt.Errorf("failed to find relative path to file '%s'", filePath)
 		}
 
+		// TODO: We can abstract the zip file for testing.
 		writer, err := zipWriter.Create(path.Join(proj.baseName, relFilePath))
 		if err != nil {
 			return fmt.Errorf("failed add file to zip %s", filePath)
