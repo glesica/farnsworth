@@ -12,11 +12,11 @@ functional-test:
 	cram tests/*.t
 
 get-deps:
-	go get ./...
+	go get -t ./...
 	pip install -r tests/requirements.txt
 
 get-deps-user:
-	go get ./...
+	go get -t ./...
 	pip install --user -r tests/requirements.txt
 
 unit-test:
