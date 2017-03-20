@@ -11,6 +11,7 @@ import (
 
 	"strings"
 
+	"github.com/glesica/farnsworth/ignore"
 	"github.com/glesica/farnsworth/proxy"
 )
 
@@ -19,38 +20,49 @@ type Project struct {
 	proxy.Proxy
 
 	baseName string
+	filter   ignore.Filter
 	path     string
 }
+
+// A FilterFactory creates and returns a Filter suitable for use with
+// the project rooted at the given path.
+type FilterFactory func(projectPath string) (ignore.Filter, error)
 
 // A ProxyFactory creates and returns the appropriate kind of
 // Proxy for a given path.
 type ProxyFactory func(projectPath string) (proxy.Proxy, error)
 
-func loadWithFactory(projectPath string, proxyFactory ProxyFactory) (*Project, error) {
-	absProjectPath, err := filepath.Abs(projectPath)
+func loadWithFactories(projectPath string, filterFactory FilterFactory, proxyFactory ProxyFactory) (*Project, error) {
+	projectAbsPath, err := filepath.Abs(projectPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert '%s' to absolute path", projectPath)
 	}
 
-	projectBaseName := filepath.Base(absProjectPath)
+	projectBaseName := filepath.Base(projectAbsPath)
 
-	proxy, err := proxyFactory(projectPath)
+	projectFilter, err := filterFactory(projectAbsPath)
+	if err != nil {
+		return nil, err
+	}
+
+	projectProxy, err := proxyFactory(projectAbsPath)
 	if err != nil {
 		return nil, err
 	}
 
 	project := Project{
-		Proxy:    proxy,
+		Proxy:    projectProxy,
 		baseName: projectBaseName,
-		path:     absProjectPath,
+		filter:   projectFilter,
+		path:     projectAbsPath,
 	}
 
 	return &project, nil
 }
 
 // Load creates a new project from a path.
-func Load(projectPath string) (*Project, error) {
-	return loadWithFactory(projectPath, proxy.Get)
+func Load(projectPath string, filterFactory FilterFactory, proxyFactory ProxyFactory) (*Project, error) {
+	return loadWithFactories(projectPath, filterFactory, proxyFactory)
 }
 
 // BaseName returns the name of the directory that contains the project root.

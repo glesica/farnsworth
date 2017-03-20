@@ -89,14 +89,14 @@ type Factory func() Proxy
 
 // Get returns an instance of the correct proxy for the project
 //rooted at the given path.
-func Get(path string) (Proxy, error) {
+func Get(rootPath string) (Proxy, error) {
 	for _, entry := range proxyRegistry {
-		if entry.validator(path) {
+		if entry.validator(rootPath) {
 			return entry.factory(), nil
 		}
 	}
 
-	return nil, fmt.Errorf("path '%s' is not a valid project root", path)
+	return nil, fmt.Errorf("path '%s' is not a valid project root", rootPath)
 }
 
 // Register adds a given factory to be considered when making a call
