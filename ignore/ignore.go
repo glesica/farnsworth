@@ -5,6 +5,7 @@ import (
 	"io"
 	"bufio"
 	"os"
+	"path"
 )
 
 const IGNORE_FILE_NAME = ".farnsworthignore"
@@ -77,7 +78,7 @@ func Load(ignoreFile io.Reader) (Filter, error) {
 }
 
 func Get(rootPath string) (Filter, error) {
-	ignoreFile, err := os.Open(IGNORE_FILE_NAME)
+	ignoreFile, err := os.Open(path.Join(rootPath, IGNORE_FILE_NAME))
 	if err != nil {
 		// If the file doesn't exist, that's not really an error,
 		// we just return an "empty" filter.
