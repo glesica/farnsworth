@@ -21,10 +21,8 @@ Merge the original project into the decompressed archive.
 
 Check that ignored files were ignored
 
-  $ ls java
-  README.md
-  build.gradle
-  src
+  $ ls java/src/test
+  java
 
 Check the Main.java file.
 

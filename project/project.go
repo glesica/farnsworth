@@ -101,7 +101,9 @@ func (proj *Project) MergeFrom(mergeProj Project) error {
 			return nil
 		}
 
-		if proj.filter.ShouldIgnore(filePath) {
+		// Don't take files that are ignored in the project being
+		// merged.
+		if mergeProj.filter.ShouldIgnore(filePath) {
 			return nil
 		}
 
