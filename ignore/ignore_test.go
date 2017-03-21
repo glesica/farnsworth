@@ -3,8 +3,8 @@ package ignore
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"bytes"
+	"github.com/stretchr/testify/assert"
 	"strings"
 )
 
@@ -33,11 +33,11 @@ func getNewRegexPredicate(t *testing.T, pattern string) predicate {
 }
 
 func TestNewRegexPredicate(t *testing.T) {
-	p0 := getNewRegexPredicate(t,"simple")
+	p0 := getNewRegexPredicate(t, "simple")
 	assert.True(t, p0("simple is good"))
 	assert.False(t, p0("complex is bad"))
 
-	p1 := getNewRegexPredicate(t,"^simple")
+	p1 := getNewRegexPredicate(t, "^simple")
 	assert.True(t, p1("simple is good"))
 	assert.False(t, p1("good is simple"))
 

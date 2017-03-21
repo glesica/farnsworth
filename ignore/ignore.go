@@ -1,11 +1,11 @@
 package ignore
 
 import (
-	"regexp"
-	"io"
 	"bufio"
+	"io"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 )
 

@@ -5,11 +5,11 @@ import (
 
 	"github.com/urfave/cli"
 
+	"github.com/glesica/farnsworth/ignore"
 	"github.com/glesica/farnsworth/project"
+	"github.com/glesica/farnsworth/proxy"
 	_ "github.com/glesica/farnsworth/proxy/golang"
 	_ "github.com/glesica/farnsworth/proxy/java"
-	"github.com/glesica/farnsworth/proxy"
-	"github.com/glesica/farnsworth/ignore"
 )
 
 func main() {

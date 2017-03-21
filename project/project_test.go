@@ -5,8 +5,8 @@ import (
 
 	"strings"
 
-	"github.com/glesica/farnsworth/proxy"
 	"github.com/glesica/farnsworth/ignore"
+	"github.com/glesica/farnsworth/proxy"
 	"github.com/stretchr/testify/assert"
 )
 
