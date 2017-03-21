@@ -59,6 +59,7 @@ func newRegexPredicate(patternString string) (predicate, error) {
 	}, nil
 }
 
+// Load creates a Filter from an ignore file.
 func Load(ignoreFile io.Reader) (Filter, error) {
 	f := filter{}
 
@@ -77,6 +78,8 @@ func Load(ignoreFile io.Reader) (Filter, error) {
 	return &f, nil
 }
 
+// Get returns an appropriate Filter based on the ignore file
+// found in the given directory.
 func Get(rootPath string) (Filter, error) {
 	ignoreFile, err := os.Open(path.Join(rootPath, IGNORE_FILE_NAME))
 	if err != nil {
