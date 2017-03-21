@@ -19,6 +19,13 @@ Merge the original project into the decompressed archive.
 
   $ "$FW" merge --project java/ "$TESTDIR/projects/java"
 
+Check that ignored files were ignored
+
+  $ ls java
+  README.md
+  build.gradle
+  src
+
 Check the Main.java file.
 
   $ cat java/src/main/java/Main.java

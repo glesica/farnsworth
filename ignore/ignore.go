@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"os"
 	"path"
+	"strings"
 )
 
 const IGNORE_FILE_NAME = ".farnsworthignore"
@@ -59,8 +60,8 @@ func newRegexPredicate(patternString string) (predicate, error) {
 	}, nil
 }
 
-// Load creates a Filter from an ignore file.
-func Load(ignoreFile io.Reader) (Filter, error) {
+// load creates a filter from an ignore file.
+func load(ignoreFile io.Reader) (*filter, error) {
 	f := filter{}
 
 	ignoreScanner := bufio.NewScanner(ignoreFile)
@@ -91,5 +92,15 @@ func Get(rootPath string) (Filter, error) {
 		return nil, err
 	}
 
-	return Load(ignoreFile)
+	f, err := load(ignoreFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// Ignore the ignore file...
+	f.addPredicate(func(filePath string) bool {
+		return strings.HasSuffix(filePath, IGNORE_FILE_NAME)
+	})
+
+	return f, nil
 }

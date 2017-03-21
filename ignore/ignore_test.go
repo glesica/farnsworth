@@ -50,9 +50,9 @@ func TestNewRegexPredicate(t *testing.T) {
 func TestLoad(t *testing.T) {
 	buffer := bytes.NewBufferString("first\nsecond")
 
-	f, err := Load(buffer)
+	f, err := load(buffer)
 	if err != nil {
-		t.Fatal("Expected Load to complete successfully")
+		t.Fatal("Expected load to complete successfully")
 	}
 
 	assert.True(t, f.ShouldIgnore("first"))
