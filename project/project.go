@@ -101,6 +101,10 @@ func (proj *Project) MergeFrom(mergeProj Project) error {
 			return nil
 		}
 
+		if proj.filter.ShouldIgnore(filePath) {
+			return nil
+		}
+
 		// Merge the file
 
 		srcFile, err := os.Open(filePath)
@@ -157,6 +161,10 @@ func (proj *Project) Zip(zipPath string, private bool) error {
 		}
 
 		if fileInfo.IsDir() {
+			return nil
+		}
+
+		if proj.filter.ShouldIgnore(filePath) {
 			return nil
 		}
 

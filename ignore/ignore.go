@@ -1,52 +1,91 @@
 package ignore
 
-import "github.com/gobwas/glob"
+import (
+	"regexp"
+	"io"
+	"bufio"
+	"os"
+)
 
-// A Predicate returns `true` for paths that should be excluded from
+const IGNORE_FILE_NAME = ".farnsworthignore"
+
+// A Filter determines whether or not a given path should be
+// ignored.
+type Filter interface {
+	ShouldIgnore(filePath string) bool
+}
+
+// A predicate returns `true` for paths that should be excluded from
 // an archive or merge operation, and `false` otherwise.
 //
 // For example, users might want to keep version control metadata out of
 // archives, in which case a path that ended in `.gitignore` might cause
 // the predicate to return `true`.
-type Predicate func(path string) bool
-
-// TODO: Make Filter into an interface.
+type predicate func(path string) bool
 
 // A Filter is a collection of Predicates.
-type Filter struct {
-	predicates []Predicate
-}
-
-// AddPredicate adds a Predicate to the Filter.
-func (filter *Filter) AddPredicate(predicate Predicate) {
-	filter.predicates = append(filter.predicates, predicate)
+type filter struct {
+	predicates []predicate
 }
 
 // ShouldIgnore returns the logical disjunction of the predicates
 // included in the Filter.
-func (filter *Filter) ShouldIgnore(path string) bool {
-	for _, predicate := range filter.predicates {
-		if predicate(path) {
+func (f *filter) ShouldIgnore(filePath string) bool {
+	for _, predicate := range f.predicates {
+		if predicate(filePath) {
 			return true
 		}
 	}
 	return false
 }
 
-func GlobPredicate(globString string) Predicate {
-	g := glob.MustCompile(globString)
-	return func(path string) bool {
-		return g.Match(path)
+// addPredicate adds a predicate to the Filter.
+func (f *filter) addPredicate(predicate predicate) {
+	f.predicates = append(f.predicates, predicate)
+}
+
+// newRegexPredicate creates a predicate that checks to see if the path
+// matches the given regular expression. The predicate will return
+// `true` if they match.
+func newRegexPredicate(patternString string) (predicate, error) {
+	pattern, err := regexp.CompilePOSIX(patternString)
+	if err != nil {
+		return nil, err
 	}
+
+	return func(filePath string) bool {
+		return pattern.MatchString(filePath)
+	}, nil
+}
+
+func Load(ignoreFile io.Reader) (Filter, error) {
+	f := filter{}
+
+	ignoreScanner := bufio.NewScanner(ignoreFile)
+	for ignoreScanner.Scan() {
+		nextPatternString := ignoreScanner.Text()
+
+		nextPredicate, err := newRegexPredicate(nextPatternString)
+		if err != nil {
+			return nil, err
+		}
+
+		f.addPredicate(nextPredicate)
+	}
+
+	return &f, nil
 }
 
 func Get(rootPath string) (Filter, error) {
-	filter := Filter{}
-	// Something like this...
-	// There's a Go package that will read a .gitignore file, which
-	// would be a handy feature, but I'd rather not couple to Git.
-	// Maybe just use regular expressions? But how weird are Go
-	// regular expressions?
-	filter.AddPredicate(GlobPredicate("*.git"))
-	return filter, nil
+	ignoreFile, err := os.Open(IGNORE_FILE_NAME)
+	if err != nil {
+		// If the file doesn't exist, that's not really an error,
+		// we just return an "empty" filter.
+		if os.IsNotExist(err) {
+			return &filter{}, nil
+		}
+		return nil, err
+	}
+
+	return Load(ignoreFile)
 }

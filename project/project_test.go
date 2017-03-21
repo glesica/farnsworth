@@ -11,7 +11,7 @@ import (
 )
 
 func filterFactory(path string) (ignore.Filter, error) {
-	return ignore.Filter{}, nil
+	return nil, nil
 }
 
 func proxyFactory(path string) (proxy.Proxy, error) {

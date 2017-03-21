@@ -4,37 +4,60 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"bytes"
 	"strings"
 )
 
-func addPredicate(t *testing.T, filter *Filter, predicate Predicate) {
-	startLength := len(filter.predicates)
-	filter.AddPredicate(predicate)
-	assert.Len(t, filter.predicates, startLength + 1)
-}
-
-func TestAddPredicate(t *testing.T) {
-	filter := Filter{}
-	addPredicate(t, &filter, func(path string) bool {
-		return true
-	})
-	addPredicate(t, &filter, func(path string) bool {
-		return false
-	})
-	assert.True(t, filter.predicates[0](""))
-	assert.False(t, filter.predicates[1](""))
-}
-
 func TestShouldIgnore(t *testing.T) {
-	filter := Filter{}
-	filter.AddPredicate(func(path string) bool {
+	f := filter{}
+
+	f.addPredicate(func(path string) bool {
 		return strings.HasPrefix(path, "ignore")
 	})
-	filter.AddPredicate(func(path string) bool {
+	f.addPredicate(func(path string) bool {
 		return strings.HasSuffix(path, "ignore")
 	})
-	assert.True(t, filter.ShouldIgnore("ignore something"))
-	assert.True(t, filter.ShouldIgnore("something ignore"))
-	assert.True(t, filter.ShouldIgnore("ignore something ignore"))
-	assert.False(t, filter.ShouldIgnore("something"))
+
+	assert.True(t, f.ShouldIgnore("ignore something"))
+	assert.True(t, f.ShouldIgnore("something ignore"))
+	assert.True(t, f.ShouldIgnore("ignore something ignore"))
+	assert.False(t, f.ShouldIgnore("something"))
+}
+
+func getNewRegexPredicate(t *testing.T, pattern string) predicate {
+	predicate, err := newRegexPredicate(pattern)
+	if err != nil {
+		t.Fatalf("Failed to create predicate for '%s'", pattern)
+	}
+	return predicate
+}
+
+func TestNewRegexPredicate(t *testing.T) {
+	p0 := getNewRegexPredicate(t,"simple")
+	assert.True(t, p0("simple is good"))
+	assert.False(t, p0("complex is bad"))
+
+	p1 := getNewRegexPredicate(t,"^simple")
+	assert.True(t, p1("simple is good"))
+	assert.False(t, p1("good is simple"))
+
+	p2 := getNewRegexPredicate(t, "[sd]imple")
+	assert.True(t, p2("simple"))
+	assert.True(t, p2("dimple"))
+	assert.False(t, p2("complex"))
+}
+
+func TestLoad(t *testing.T) {
+	buffer := bytes.NewBufferString("first\nsecond")
+
+	f, err := Load(buffer)
+	if err != nil {
+		t.Fatal("Expected Load to complete successfully")
+	}
+
+	assert.True(t, f.ShouldIgnore("first"))
+	assert.True(t, f.ShouldIgnore("second"))
+	assert.True(t, f.ShouldIgnore("foo/first/bar"))
+	assert.True(t, f.ShouldIgnore("foo/second/bar"))
+	assert.False(t, f.ShouldIgnore("fourth"))
 }
