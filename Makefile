@@ -12,12 +12,16 @@ functional-test:
 	cram tests/*.t
 
 get-deps:
-	go get ./...
-	pip install -r tests/requirements.txt
+	go get -t ./...
+	pip install -q -r tests/requirements.txt
 
+# This is meant primarily for CI. It installs Python dependencies
+# in the user location to avoid the need for sudo or a virtual
+# environment. For development it is probably better to create
+# a virtual environment and then use `get-deps`.
 get-deps-user:
-	go get ./...
-	pip install --user -r tests/requirements.txt
+	go get -t ./...
+	pip install -q --user -r tests/requirements.txt
 
 unit-test:
 	echo "Running unit tests..."

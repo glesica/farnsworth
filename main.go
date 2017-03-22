@@ -5,7 +5,9 @@ import (
 
 	"github.com/urfave/cli"
 
+	"github.com/glesica/farnsworth/ignore"
 	"github.com/glesica/farnsworth/project"
+	"github.com/glesica/farnsworth/proxy"
 	_ "github.com/glesica/farnsworth/proxy/golang"
 	_ "github.com/glesica/farnsworth/proxy/java"
 )
@@ -18,7 +20,7 @@ func main() {
 	app.Usage = "Create and evaluate programming assignments"
 	app.Version = "0.1.0"
 	app.Authors = []cli.Author{
-		cli.Author{
+		{
 			Name:  "George Lesica",
 			Email: "george@lesica.com",
 		},
@@ -34,7 +36,9 @@ func main() {
 					return cli.NewExitError("No archive path provided.", 10)
 				}
 
-				proj, projErr := project.Load(c.String("project"))
+				projectPath := c.String("project")
+
+				proj, projErr := project.Load(projectPath, ignore.Get, proxy.Get)
 				if projErr != nil {
 					return cli.NewExitError("Failed to load project.", 10)
 				}
@@ -64,12 +68,16 @@ func main() {
 					return cli.NewExitError("No project to merged specified.", 10)
 				}
 
-				proj, projErr := project.Load(c.String("project"))
+				projectPath := c.String("project")
+
+				proj, projErr := project.Load(projectPath, ignore.Get, proxy.Get)
 				if projErr != nil {
 					return cli.NewExitError("Failed to load project.", 10)
 				}
 
-				mergeProj, mergeProjErr := project.Load(c.Args().Get(0))
+				mergeProjectPath := c.Args().Get(0)
+
+				mergeProj, mergeProjErr := project.Load(mergeProjectPath, ignore.Get, proxy.Get)
 				if mergeProjErr != nil {
 					return cli.NewExitError("Failed to load merge target project.", 10)
 				}
